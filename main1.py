@@ -18,7 +18,7 @@ bot = telebot.TeleBot(TOKEN)
 
 # Подключение к Google Sheets
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name(config.GOOGLE_CREDENTIALS_FILE, scope)
+creds = ServiceAccountCredentials.from_json_keyfile_name(GOOGLE_CREDENTIALS_FILE, scope)
 client = gspread.authorize(creds)
 sheet = client.open_by_key(SPREADSHEET_ID)
 
