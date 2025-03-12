@@ -5,7 +5,6 @@ from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 import os
 import time
 import requests
-import os
 import tempfile
 
 # Используем переменные из config.py
@@ -26,8 +25,6 @@ scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/au
 creds = ServiceAccountCredentials.from_json_keyfile_name(temp_file_path, scope)
 client = gspread.authorize(creds)
 sheet = client.open_by_key(SPREADSHEET_ID)
-
-# Продолжайте писать код для бота
 
 # Контакты школы 
 CONTACTS = "📞 Приемная - +7(3952)46-29-30\n📞 Бухгалтерия - +7(3952)46-52-30\n✉️ Эл.почта - school4.irk@ru\n\n📱 ВК - https://vk.com/irk.school4\n🖥 Cайт - https://sh4-irkutsk-r138.gosweb.gosuslugi.ru/?cur_cc=2873&curPos=5"
@@ -52,8 +49,9 @@ def start(message):
     if str(user_id) not in existing_users:
         sheet_users.append_row([str(user_id)])
 
-    main_menu(message) 
+    main_menu(message)
 
+# Обработчик для кнопки "🗓 Расписание"
 @bot.message_handler(func=lambda message: message.text == "🗓 Расписание")
 def choose_shift(message):
     markup = ReplyKeyboardMarkup(resize_keyboard=True)
@@ -80,6 +78,7 @@ def send_second_shift_schedule(message):
 def go_back(message):
     main_menu(message)
 
+# Обработчик для кнопки "🔔 Звонки"
 @bot.message_handler(func=lambda message: message.text == "🔔 Звонки")
 def choose_day(message):
     markup = ReplyKeyboardMarkup(resize_keyboard=True)
@@ -88,10 +87,12 @@ def choose_day(message):
     markup.add(KeyboardButton("⬅️ Назад"))
     bot.send_message(message.chat.id, "Выберите день недели:", reply_markup=markup)
 
+# Обработчик для кнопки "⬅️ Назад"
 @bot.message_handler(func=lambda message: message.text == "⬅️ Назад")
 def go_back(message):
     main_menu(message)
 
+# Обработчик для кнопки "📅 Пн/Чт"
 @bot.message_handler(func=lambda message: message.text == "📅 Пн/Чт")
 def get_bells_pn(message):
     bells_text = """
@@ -121,6 +122,7 @@ def get_bells_pn(message):
     markup.add(KeyboardButton("⬅️ Назад"))
     bot.send_message(message.chat.id, "Вернуться в главное меню?", reply_markup=markup)
 
+# Обработчик для кнопки "📅 Сб"
 @bot.message_handler(func=lambda message: message.text == "📅 Сб")
 def get_bells_sb(message):
     bells_text = """
@@ -141,6 +143,7 @@ def get_bells_sb(message):
     markup.add(KeyboardButton("⬅️ Назад"))
     bot.send_message(message.chat.id, "Вернуться в главное меню?", reply_markup=markup)
 
+# Обработчик для кнопки "📅 Остальные дни"
 @bot.message_handler(func=lambda message: message.text == "📅 Остальные дни")
 def get_bells_other(message):
     bells_text = """
@@ -223,108 +226,40 @@ def save_news_image(message, news_text):
         bot.send_message(message.chat.id, "➡️ Фото получено\nДобавьте файл\n\n🕛 Загрузка файла может занять время, подождите")
         markup = ReplyKeyboardMarkup(resize_keyboard=True)
         markup.add(KeyboardButton("❌ Отменить"), KeyboardButton("Пропустить"))
-        #   bot.send_message(message.chat.id, "Вы можете отменить создание новости c помощью клавиатуры\n'❌ Отменить'", reply_markup=markup)
         bot.register_next_step_handler(message, save_news_file, news_text, image_path)
     else:
         bot.send_message(message.chat.id, "❌Изображение не получено\nДобавьте файл\n\n🕛 Загрузка файла может занять время, подождите")
-        bot.register_next_step_handler(message, save_news_file, news_text)
 
 def save_news_file(message, news_text, image_path=None):
     if message.text == "❌ Отменить":
         admin_panel(message)  # Возвращаемся в админ-панель
         return
 
-    if message.text == "Пропустить":
-        save_news_to_sheet(message, news_text, image_path)
-        return
-
     if message.document:
-        file_id = message.document.file_id
-        file_info = bot.get_file(file_id)
+        file = message.document
+        file_info = bot.get_file(file.file_id)
+        downloaded_file = bot.download_file(file_info.file_path)
+        file_path = f"news_file_{int(time.time())}.pdf"
 
-        try:
-            downloaded_file = bot.download_file(file_info.file_path)
-            file_path = f"news_file_{int(time.time())}.pdf"
+        with open(file_path, 'wb') as new_file:
+            new_file.write(downloaded_file)
 
-            with open(file_path, 'wb') as new_file:
-                new_file.write(downloaded_file)
+        bot.send_message(message.chat.id, "➡️ Файл получен\nПубликуем новость!")
+        # Сохраняем новость в Google Таблицы
+        sheet_news = sheet.worksheet("Новости")
+        sheet_news.append_row([news_text, image_path if image_path else "Нет изображения", file_path])
 
-            bot.send_message(message.chat.id, "✅ Файл сохранен! Рассылаем всем пользователям...")
-            save_news_to_sheet(message, news_text, image_path, file_path)
-
-        except requests.exceptions.RequestException as e:
-            bot.send_message(message.chat.id, f"❌ Ошибка при загрузке файла: {e}")
-            bot.send_message(message.chat.id, "Попробуйте отправить файл еще раз.")
-            bot.register_next_step_handler(message, save_news_file, news_text, image_path)
+        bot.send_message(message.chat.id, f"➡️ Новость сохранена и опубликована!\n\n{news_text}")
+        admin_panel(message)  # Возвращаемся в админ-панель
     else:
-        save_news_to_sheet(message, news_text, image_path)
-
-def save_news_to_sheet(message, news_text, image_path=None, file_path=None):
-    # Сохранение новости в Google Таблицы
-    news_date = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
-    sheet_news = sheet.worksheet("Новости")
-    new_row = [news_date, news_text, image_path or "", file_path or ""]
-    sheet_news.append_row(new_row)
-
-    # Отправка новости всем пользователям
-    sheet_users = sheet.worksheet("Пользователи")
-    user_ids = [row[0] for row in sheet_users.get_all_values()]
-    
-    for user_id in user_ids:
-        try:
-            if image_path:
-                with open(image_path, 'rb') as img:
-                    bot.send_photo(user_id, img, caption=news_text)
-                time.sleep(1)  # Задержка, чтобы сообщения не слипались
-
-            if file_path:
-                with open(file_path, 'rb') as doc:
-                    bot.send_document(user_id, doc, caption="📎 Прикрепленный файл")
-                time.sleep(1)
-
-            if not image_path and not file_path:
-                bot.send_message(user_id, news_text)
-
-        except Exception as e:
-            print(f"❌ Ошибка при отправке пользователю {user_id}: {e}")
-
-    bot.send_message(message.chat.id, "✅ Новость сохранена и отправлена всем пользователям.")
-
-    # Возвращаем в админ-панель
-    admin_panel(message)
-
-
-# Обработчики команд
-@bot.message_handler(commands=['start'])
-def start(message):
-    user_id = message.chat.id
-    sheet_users = sheet.worksheet("Пользователи")
-    
-    # Проверяем, есть ли этот пользователь уже в таблице
-    existing_users = [row[0] for row in sheet_users.get_all_values()]
-    if str(user_id) not in existing_users:
-        sheet_users.append_row([str(user_id)])
-
-    main_menu(message)
+        bot.send_message(message.chat.id, "❌ Файл не получен. Попробуйте еще раз.")
 
 @bot.message_handler(func=lambda message: message.text == "⚙️ Админ-панель")
 def open_admin_panel(message):
     if message.chat.id not in ADMIN_IDS:
-        bot.send_message(message.chat.id, "⚠️У вас нет доступа к админ-панели⚠️")
+        bot.send_message(message.chat.id, "⚠️ У вас нет доступа к админ-панели ⚠️")
         return
     admin_panel(message)
 
-@bot.message_handler(func=lambda message: message.text == "📝 Создать новость")
-def create_news(message):
-    send_news(message)
-
-@bot.message_handler(func=lambda message: message.text == "⬅️ Назад")
-def go_back(message):
-    main_menu(message)
-
-# Команды для пользователей
-@bot.message_handler(func=lambda message: message.text == "📞 Контакты")
-def get_contacts(message):
-    bot.send_message(message.chat.id, f"Контакты школы:\n{CONTACTS}")
-
-bot.polling(none_stop=True)
+if __name__ == "__main__":
+    bot.polling(none_stop=True)
