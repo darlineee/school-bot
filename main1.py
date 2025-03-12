@@ -9,10 +9,10 @@ import os
 
 
 # Используем переменные из config.py
-TOKEN = os.getenv(TOKEN)  # Токен для бота
-SPREADSHEET_ID = os.getenv(SPREADSHEET_ID)  # ID Google Таблицы
-GOOGLE_CREDENTIALS_FILE = os.getenv(GOOGLE_CREDENTIALS_FILE)  # Путь к JSON файлу
-ADMIN_IDS = os.getenv(ADMIN_IDS)  # Список ID администраторов
+TOKEN = os.getenv('TOKEN')  # Токен для бота
+SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')  # ID Google Таблицы
+GOOGLE_CREDENTIALS_FILE = os.getenv('GOOGLE_CREDENTIALS_FILE')  # Путь к JSON файлу
+ADMIN_IDS = os.getenv('ADMIN_IDS')  # Список ID администраторов
 
 bot = telebot.TeleBot(TOKEN)
 
