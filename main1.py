@@ -6,6 +6,7 @@ import os
 import time
 import requests
 import os
+import tempfile
 
 # Используем переменные из config.py
 TOKEN = os.getenv('TOKEN')  # Токен для бота
