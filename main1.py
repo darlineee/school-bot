@@ -9,10 +9,10 @@ import os
 import tempfile
 
 # Используем переменные из config.py
-TOKEN = "7265850860:AAGc4-B7IuSFm82bvmR5R8n8YY3ufL8dP4U"
-SPREADSHEET_ID = "1_9EPPB6HrT5LbZ47ePnuys-SuQmzIA4XLL5r3jP8rKo"
-GOOGLE_CREDENTIALS_FILE = '{"type": "service_account", "project_id": "arcane-bit-449710-a5", "private_key_id": "84842ac6c3cc880e55163ffd33a0a62947d18a2e", "private_key": "-----BEGIN PRIVATE KEY-----\\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDFbhGOFJnemOV7\\nvjnwoUngX4OlhaKOdipbDmTJxl+UVa3JXcCoUX/325QGFgBYrSw4e5NKHbTDm/iV\\npVmbZWGOj5VRfA+LWl/q5RncMX++/x7ut7VzS3uaxEjUgTCDnlySvrbIIXVkmVqb\\n0BDtn+92NjgWiII3lDkIREOzBRV5ckF2HFAvjCzAIvl1vN3S0AulaaerX+Hu7XgI\\naDqqnwvaSWBZ6/AL0COgj4KA7l4/px07jJNt9btcE0pPLdn3JXPLtMj3PV+A1M96\\nolgox96QeypjlB3mnTskmN3YjT56rz55Q+lVNU+z/TQOMbwIm9SVQ+lDOdB2/biY\\nerFQHyKDAgMBAAECggEAI5K0Dg4vNVkGTFgXt4BQP+Hl5g6gnhuzgQmkZmjccu1H\\nLXe7jXh13tKNJtWTBWdahujZPqsAlZhGX6xV63aGb/n2FSMN5/WGP9w83xx6II92\\nYtvuEVKh+F5yovuOIsEHfBdp9sB0lwY8ucNxMWe2bW3SiFjbYalO52rpadm6J1H6\\naz+6xnMLfzLEwe0Goz81VURn2NcWw/ouw7sTgpKQsQi6yGUKKOh9o/nPO2MXVFUB\\nDHeG7h/X9RzD6Uk7R9inmZRUXY6J0mdzxkVstpRqItHyzpGP5WlZEhjuhCxnvKd3\\nQNg6+rJXFA9GhvJy5x0DcRQ7jSXdJ06hP5M6NBQB7QKBgQDkynvdK+cX+hJrIDqf\\n9IY5HMuESmYWPeEaAYkTmXw1nQWnOhVxKJV2WbEE7DeUdapvCIY4AbYgdJxA8pqO\\niDxVFIb9g1jvs23VSUUnv88jWlomh+eMOccJ/jYeGPmbttL0zvXTczP2wRp7vc8c\\nAhKIhA+08mdCCsPIgb+9czFdpQKBgQDc6M1xsuHs3h946SC3ScRPBw6boOjOwf3m\\n5qYb8TYw1b9ixeTxmArJRsA+UQNuQrvGdYZBoc0dbOKptiEkD9vwrKp8AumqAG3r\\n8dbgFpDZqm/DKq0iKxHocxkPAW3k4ro4gpxO5qYHPd3cp47oh9VeXM6DyKVTqEWW\\n2jPD6aDXBwKBgHokz7PoOFvImgSvFB1JQk9DXDOoNJAzQPXNVA0up+1Hgzkf/UqI\\nTCL/B06Ffba4iuD0QBOudjkliDX0TydA/FS/vMGjWdu+gyiXEWCDOma5Wd+wNqHa\\nRrTDDslKtBe5py4jP4I/wsI9nZHqZ6OgR5yyRGBp+U58yMFG48KUuQoxAoGAAgW/\\nm8LffqOp9hlsS0FJos+VuqcGep4cDPkfnDHhJSFP1z+okO2ra5xSNj/XoDLMNUzu\\nJbutfQ96I8OfGg1rHhD2npwIN545Y2ebaAHM4bFFxKunWiC60T38hL6mmunYepv3\\ngmFqM7bFSTfffxF/SpXe7iXwHYv01yS4RJrm9hECgYBnfNykluLetmWQkZ8UW/QD\\nqOQ2vd9f3mC8HAEz1yGSF5nbuCwl7Q/cEXgn1QAR49b7qCLrx7QIMmj6MiekA0LW\\nwX3hfK6Bm7wQ6GP3rrHzc3QqZgwSmuTdzO3jzKlt6NwFWvaRMoAdLUCQ0kU/45R1\\nSyD+7jMxszpyRnNXByxGoA==\\n-----END PRIVATE KEY-----\\n", "client_email": "sheets-bot@arcane-bit-449710-a5.iam.gserviceaccount.com", "client_id": "108943396251974767007", "auth_uri": "https://accounts.google.com/o/oauth2/auth", "token_uri": "https://oauth2.googleapis.com/token", "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs", "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/sheets-bot%40arcane-bit-449710-a5.iam.gserviceaccount.com", "universe_domain": "googleapis.com"}'
-ADMIN_IDS = [6916553173]
+TOKEN = os.getenv('TOKEN')  # Токен для бота
+SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')  # ID Google Таблицы
+GOOGLE_CREDENTIALS_JSON = os.getenv('GOOGLE_CREDENTIALS_FILE')  # Содержимое JSON файла в виде строки
+ADMIN_IDS = os.getenv('ADMIN_IDS')  # Список ID администраторов
 
 bot = telebot.TeleBot(TOKEN)
 
