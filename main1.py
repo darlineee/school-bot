@@ -7,20 +7,27 @@ import time
 import requests
 import os
 
-
 # Используем переменные из config.py
 TOKEN = os.getenv('TOKEN')  # Токен для бота
 SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')  # ID Google Таблицы
-GOOGLE_CREDENTIALS_FILE = os.getenv('GOOGLE_CREDENTIALS_FILE')  # Путь к JSON файлу
+GOOGLE_CREDENTIALS_JSON = os.getenv('GOOGLE_CREDENTIALS_FILE')  # Содержимое JSON файла в виде строки
 ADMIN_IDS = os.getenv('ADMIN_IDS')  # Список ID администраторов
 
 bot = telebot.TeleBot(TOKEN)
 
+# Сохраняем JSON в временный файл
+with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+    temp_file.write(GOOGLE_CREDENTIALS_JSON.encode())  # Преобразуем строку в байты и записываем
+    temp_file_path = temp_file.name
+
 # Подключение к Google Sheets
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name(GOOGLE_CREDENTIALS_FILE, scope)
+creds = ServiceAccountCredentials.from_json_keyfile_name(temp_file_path, scope)
 client = gspread.authorize(creds)
 sheet = client.open_by_key(SPREADSHEET_ID)
+
+# Продолжайте писать код для бота
+
 
 # Контакты школы 
 CONTACTS = "📞 Приемная - +7(3952)46-29-30\n📞 Бухгалтерия - +7(3952)46-52-30\n✉️ Эл.почта - school4.irk@ru\n\n📱 ВК - https://vk.com/irk.school4\n🖥 Cайт - https://sh4-irkutsk-r138.gosweb.gosuslugi.ru/?cur_cc=2873&curPos=5"
