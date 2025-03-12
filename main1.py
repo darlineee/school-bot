@@ -272,17 +272,17 @@ def save_news_to_sheet(message, news_text, image_path=None, file_path=None):
     
     for user_id in user_ids:
         try:
-            if image_path:
+            if image_path:  # Если есть изображение, отправляем его с текстом
                 with open(image_path, 'rb') as img:
                     bot.send_photo(user_id, img, caption=news_text)
-                time.sleep(1)  # Задержка, чтобы сообщения не слипались
+                time.sleep(1)
 
-            if file_path:
+            if file_path:  # Если есть файл, отправляем его с текстом
                 with open(file_path, 'rb') as doc:
                     bot.send_document(user_id, doc, caption="📎 Прикрепленный файл")
                 time.sleep(1)
 
-            if not image_path and not file_path:
+            if not image_path and not file_path:  # Если нет файла и изображения, только текст
                 bot.send_message(user_id, news_text)
 
         except Exception as e:
