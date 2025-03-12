@@ -29,7 +29,6 @@ sheet = client.open_by_key(SPREADSHEET_ID)
 
 # Продолжайте писать код для бота
 
-
 # Контакты школы 
 CONTACTS = "📞 Приемная - +7(3952)46-29-30\n📞 Бухгалтерия - +7(3952)46-52-30\n✉️ Эл.почта - school4.irk@ru\n\n📱 ВК - https://vk.com/irk.school4\n🖥 Cайт - https://sh4-irkutsk-r138.gosweb.gosuslugi.ru/?cur_cc=2873&curPos=5"
 
@@ -170,7 +169,6 @@ def get_bells_other(message):
     markup = ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add(KeyboardButton("⬅️ Назад"))
     bot.send_message(message.chat.id, "Вернуться в главное меню?", reply_markup=markup)
-
 
 # Функция для отображения админ-панели
 def admin_panel(message):
