@@ -4,23 +4,30 @@ from oauth2client.service_account import ServiceAccountCredentials
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 import os
 import time
-import requests 
-import config
-
+import requests
+import os
+import tempfile
 
 # Используем переменные из config.py
-TOKEN = config.TOKEN  # Токен для бота
-SPREADSHEET_ID = config.SPREADSHEET_ID  # ID Google Таблицы
-GOOGLE_CREDENTIALS_FILE = config.GOOGLE_CREDENTIALS_FILE  # Путь к JSON файлу
-ADMIN_IDS = config.ADMIN_IDS  # Список ID администраторов
+TOKEN = os.getenv('TOKEN')  # Токен для бота
+SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')  # ID Google Таблицы
+GOOGLE_CREDENTIALS_JSON = os.getenv('GOOGLE_CREDENTIALS_FILE')  # Содержимое JSON файла в виде строки
+ADMIN_IDS = os.getenv('ADMIN_IDS')  # Список ID администраторов
 
 bot = telebot.TeleBot(TOKEN)
 
+# Сохраняем JSON в временный файл
+with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+    temp_file.write(GOOGLE_CREDENTIALS_JSON.encode())  # Преобразуем строку в байты и записываем
+    temp_file_path = temp_file.name
+
 # Подключение к Google Sheets
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name(config.GOOGLE_CREDENTIALS_FILE, scope)
+creds = ServiceAccountCredentials.from_json_keyfile_name(temp_file_path, scope)
 client = gspread.authorize(creds)
 sheet = client.open_by_key(SPREADSHEET_ID)
+
+# Продолжайте писать код для бота
 
 # Контакты школы 
 CONTACTS = "📞 Приемная - +7(3952)46-29-30\n📞 Бухгалтерия - +7(3952)46-52-30\n✉️ Эл.почта - school4.irk@ru\n\n📱 ВК - https://vk.com/irk.school4\n🖥 Cайт - https://sh4-irkutsk-r138.gosweb.gosuslugi.ru/?cur_cc=2873&curPos=5"
@@ -34,6 +41,18 @@ def main_menu(message):
     if message.chat.id in ADMIN_IDS:
         markup.add(KeyboardButton("⚙️ Админ-панель"))
     bot.send_message(message.chat.id, "Добро пожаловать в школьный бот!\n\n🔎Здесь вы можете просматривать расписание уроков, звонков, а также воспользоваться контактами с школой.\n\n➡️Выберите действие:", reply_markup=markup)
+
+@bot.message_handler(commands=['start'])
+def start(message):
+    user_id = message.chat.id
+    sheet_users = sheet.worksheet("Пользователи")
+    
+    # Проверяем, есть ли этот пользователь уже в таблице
+    existing_users = [row[0] for row in sheet_users.get_all_values()]
+    if str(user_id) not in existing_users:
+        sheet_users.append_row([str(user_id)])
+
+    main_menu(message) 
 
 @bot.message_handler(func=lambda message: message.text == "🗓 Расписание")
 def choose_shift(message):
@@ -150,7 +169,6 @@ def get_bells_other(message):
     markup = ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add(KeyboardButton("⬅️ Назад"))
     bot.send_message(message.chat.id, "Вернуться в главное меню?", reply_markup=markup)
-
 
 # Функция для отображения админ-панели
 def admin_panel(message):
