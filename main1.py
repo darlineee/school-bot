@@ -5,14 +5,14 @@ from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 import os
 import time
 import requests
-import config
+import os
 
 
 # Используем переменные из config.py
-TOKEN = config.TOKEN  # Токен для бота
-SPREADSHEET_ID = config.SPREADSHEET_ID  # ID Google Таблицы
-GOOGLE_CREDENTIALS_FILE = config.GOOGLE_CREDENTIALS_FILE  # Путь к JSON файлу
-ADMIN_IDS = config.ADMIN_IDS  # Список ID администраторов
+TOKEN = os.getenv(TOKEN)  # Токен для бота
+SPREADSHEET_ID = os.getenv(SPREADSHEET_ID)  # ID Google Таблицы
+GOOGLE_CREDENTIALS_FILE = os.getenv(GOOGLE_CREDENTIALS_FILE)  # Путь к JSON файлу
+ADMIN_IDS = os.getenv(ADMIN_IDS)  # Список ID администраторов
 
 bot = telebot.TeleBot(TOKEN)
 
