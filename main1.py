@@ -41,7 +41,19 @@ def main_menu(message):
     # Кнопка для админов
     if message.chat.id in ADMIN_IDS:
         markup.add(KeyboardButton("⚙️ Админ-панель"))
-    bot.send_message(message.chat.id, "Добро пожаловать в школьный бот!\n\n🔎Здесь вы можете просматривать расписание уроков, звонков, а также воспользоваться контактами с школой.\n\n➡️Выберите действие:", reply_markup=markup)
+   bot.send_message(message.chat.id, "Добро пожаловать в школьный бот!\n\n🔎Здесь вы можете просматривать расписание уроков, звонков, а также воспользоваться контактами с школой.\n\n➡️Выберите действие:", reply_markup=markup)
+
+@bot.message_handler(commands=['start'])
+def start(message):
+    user_id = message.chat.id
+    sheet_users = sheet.worksheet("Пользователи")
+    
+    # Проверяем, есть ли этот пользователь уже в таблице
+    existing_users = [row[0] for row in sheet_users.get_all_values()]
+    if str(user_id) not in existing_users:
+        sheet_users.append_row([str(user_id)])
+
+    main_menu(message) 
 
 @bot.message_handler(func=lambda message: message.text == "🗓 Расписание")
 def choose_shift(message):
