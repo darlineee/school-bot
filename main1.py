@@ -12,7 +12,7 @@ import tempfile
 TOKEN = os.getenv('TOKEN')  # Токен для бота
 SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')  # ID Google Таблицы
 GOOGLE_CREDENTIALS_JSON = os.getenv('GOOGLE_CREDENTIALS_FILE')  # Содержимое JSON файла в виде строки
-ADMIN_IDS = os.getenv('ADMIN_IDS')  # Список ID администраторов
+ADMIN_IDS = [6916553173]  # Список ID администраторов
 
 bot = telebot.TeleBot(TOKEN)
 
