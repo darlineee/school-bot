@@ -5,7 +5,6 @@ from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 import time
 import requests
 import tempfile
-import config
 import os
 
 # --- Константы ---
