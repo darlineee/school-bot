@@ -5,6 +5,7 @@ from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 import time
 import requests
 import tempfile
+import config
 import os
 
 # --- Константы ---
@@ -77,18 +78,36 @@ def handle_start(message):
     register_user(message.chat.id)
     main_menu(message)
 
-@bot.message_handler(func=lambda m: m.text in images_data)
-def handle_photo_schedule(message):
-    url_or_path = images_data[message.text]
-    if url_or_path.startswith("http"):
-        local_path = download_image(url_or_path)
-    else:
-        local_path = url_or_path
+@bot.message_handler(func=lambda message: message.text == "📕 1 смена")
+def send_first_shift_schedule(message):
+    # Используем локальный путь для изображения 1 смены
     try:
-        with open(local_path, 'rb') as f:
-            bot.send_photo(message.chat.id, f, caption=f"➡️ Расписание: {message.text}")
+        with open('snim2.png', 'rb') as photo:
+            bot.send_photo(message.chat.id, photo, caption="➡️ Расписание для 1 смены")
     except Exception as e:
-        bot.send_message(message.chat.id, f"❌ Не удалось загрузить изображение: {e}")
+        bot.send_message(message.chat.id, f"❌ Не удалось загрузить расписание для 1 смены: {e}")
+
+@bot.message_handler(func=lambda message: message.text == "📘 2 смена")
+def send_second_shift_schedule(message):
+    # Используем локальный путь для изображения 2 смены
+    try:
+        with open('snim2.png', 'rb') as photo:
+            bot.send_photo(message.chat.id, photo, caption="➡️ Расписание для 2 смены")
+    except Exception as e:
+        bot.send_message(message.chat.id, f"❌ Не удалось загрузить расписание для 2 смены: {e}")
+
+# @bot.message_handler(func=lambda m: m.text in images_data)
+# def handle_photo_schedule(message):
+#     url_or_path = images_data[message.text]
+#     if url_or_path.startswith("http"):
+#         local_path = download_image(url_or_path)
+#     else:
+#         local_path = url_or_path
+#     try:
+#         with open(local_path, 'rb') as f:
+#             bot.send_photo(message.chat.id, f, caption=f"➡️ Расписание: {message.text}")
+#     except Exception as e:
+#         bot.send_message(message.chat.id, f"❌ Не удалось загрузить изображение: {e}")
     
 
 @bot.message_handler(func=lambda message: message.text == "🔔 Звонки")
