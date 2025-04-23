@@ -7,7 +7,7 @@ import requests
 import tempfile
 import os
 
-# --- Константы ---
+# Используем переменные из config.py
 TOKEN = os.getenv('TOKEN')  # Токен для бота
 SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')  # ID Google Таблицы
 GOOGLE_CREDENTIALS_JSON = os.getenv('GOOGLE_CREDENTIALS_FILE')  # Содержимое JSON файла в виде строки
@@ -25,6 +25,7 @@ scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/au
 creds = ServiceAccountCredentials.from_json_keyfile_name(temp_file_path, scope)
 client = gspread.authorize(creds)
 sheet = client.open_by_key(SPREADSHEET_ID)
+
 
 
 # --- Получение данных из таблиц ---
@@ -94,20 +95,6 @@ def send_second_shift_schedule(message):
             bot.send_photo(message.chat.id, photo, caption="➡️ Расписание для 2 смены")
     except Exception as e:
         bot.send_message(message.chat.id, f"❌ Не удалось загрузить расписание для 2 смены: {e}")
-
-# @bot.message_handler(func=lambda m: m.text in images_data)
-# def handle_photo_schedule(message):
-#     url_or_path = images_data[message.text]
-#     if url_or_path.startswith("http"):
-#         local_path = download_image(url_or_path)
-#     else:
-#         local_path = url_or_path
-#     try:
-#         with open(local_path, 'rb') as f:
-#             bot.send_photo(message.chat.id, f, caption=f"➡️ Расписание: {message.text}")
-#     except Exception as e:
-#         bot.send_message(message.chat.id, f"❌ Не удалось загрузить изображение: {e}")
-    
 
 @bot.message_handler(func=lambda message: message.text == "🔔 Звонки")
 def choose_day(message):
@@ -199,6 +186,7 @@ def save_news_file(message, news_text, image_path=None):
     if message.text == "❌ Отменить":
         admin_panel(message)
         return
+
     file_path = None
     if message.text != "Пропустить" and message.document:
         file_info = bot.get_file(message.document.file_id)
@@ -207,8 +195,13 @@ def save_news_file(message, news_text, image_path=None):
         with open(file_path, 'wb') as f:
             f.write(data)
 
+    # Сохраняем новость в таблицу
     sheet_news.append_row([time.strftime('%Y-%m-%d %H:%M:%S'), news_text, image_path or "", file_path or ""])
 
+    # СООБЩЕНИЕ АДМИНУ СРАЗУ
+    bot.send_message(message.chat.id, "✅ Новость сохранена. Рассылка началась...")
+
+    # Получаем всех пользователей
     user_ids = [r[0] for r in sheet_users.get_all_values()]
     for uid in user_ids:
         try:
@@ -224,9 +217,10 @@ def save_news_file(message, news_text, image_path=None):
                 bot.send_message(uid, news_text)
         except Exception as e:
             print(f"Ошибка отправки {uid}: {e}")
-    bot.send_message(message.chat.id, "✅ Новость сохранена и разослана.")
-    admin_panel(message)
 
+    # СООБЩЕНИЕ О ЗАВЕРШЕНИИ РАССЫЛКИ
+    bot.send_message(message.chat.id, "📬 Рассылка завершена.")
+    admin_panel(message)
 # --- Запуск бота ---
 if __name__ == '__main__':
     bot.polling(none_stop=True)
